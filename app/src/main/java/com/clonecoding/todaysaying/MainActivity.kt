@@ -3,6 +3,11 @@ package com.clonecoding.todaysaying
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.viewpager2.widget.ViewPager2
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * Remote config
@@ -18,16 +23,62 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initViews()
+        initData()
     }
 
     /**
-     * 뷰를 초기화 합니다.
+     * 데이터를 초기화 합니다.
      */
-    private fun initViews() {
+    private fun initData() {
 
-        this.viewPager.adapter = QuotesPagerAdapter(listOf(
-            Quote("테스트 명언", "테스트 명언 대상")
-        ))
+        val remoteConfig = Firebase.remoteConfig
+
+        remoteConfig.setConfigSettingsAsync(
+            remoteConfigSettings {
+                minimumFetchIntervalInSeconds = 0
+            }
+        )
+
+        remoteConfig.fetchAndActivate().addOnCompleteListener {
+
+            if(it.isSuccessful) {
+                val quotes = parseQuotesJson(remoteConfig.getString("quotes"))
+                val isNameRevealed = remoteConfig.getBoolean("is_name_revealed")
+
+                displayQuotesPager(quotes, isNameRevealed)
+            }
+        }
     }
+
+    private fun displayQuotesPager(quotes: List<Quote>, nameRevealed: Boolean) {
+
+        this.viewPager.adapter = QuotesPagerAdapter(
+            quotes,
+            nameRevealed
+        )
+    }
+
+    /**
+     * Parse Json
+     */
+    private fun parseQuotesJson(json: String): List<Quote> {
+
+        val jsonArray = JSONArray(json)
+        var jsonList = emptyList<JSONObject>()
+
+        for(index in 0 until jsonArray.length()) {
+            val jsonObject = jsonArray.getJSONObject(index)
+            jsonObject?.let {
+                jsonList = jsonList + it
+            }
+        }
+
+        return jsonList.map {
+            Quote(
+                it.getString("quote"),
+                it.getString("name")
+            )
+        }
+    }
+
 }

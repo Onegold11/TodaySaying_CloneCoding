@@ -1,5 +1,6 @@
 package com.clonecoding.todaysaying
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
  * ViewPager 어댑터
  */
 class QuotesPagerAdapter(
-  private val quotes: List<Quote>
+  private val quotes: List<Quote>,
+  private val isNameRevealed: Boolean
 ) : RecyclerView.Adapter<QuotesPagerAdapter.QuoteViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -21,7 +23,7 @@ class QuotesPagerAdapter(
 
     override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
 
-        holder.bind(quotes[position])
+        holder.bind(quotes[position], isNameRevealed)
     }
 
     override fun getItemCount() = quotes.size
@@ -35,10 +37,17 @@ class QuotesPagerAdapter(
 
         private val nameTextView: TextView = itemView.findViewById(R.id.nameTextView)
 
-        fun bind(quote: Quote) {
+        @SuppressLint("SetTextI18n")
+        fun bind(quote: Quote, isNameRevealed: Boolean) {
 
-            this.quoteTextView.text = quote.quote
-            this.nameTextView.text = quote.name
+            this.quoteTextView.text = "\"${quote.quote}\""
+
+            if(isNameRevealed) {
+                this.nameTextView.text = "- ${quote.name}"
+                this.nameTextView.visibility = View.VISIBLE
+            } else {
+                this.nameTextView.visibility = View.GONE
+            }
         }
     }
 }
