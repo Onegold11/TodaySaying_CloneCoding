@@ -53,6 +53,7 @@ override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
 
 ## Remote Config
 [공식 문서](https://firebase.google.com/docs/remote-config)
+
 앱의 업데이트 없이 다양한 데이터를 받을 수 있는 기능
 - 전달받은 데이터를 사용해 컨텐츠, UI 등을 변경할 수 있다.
 
